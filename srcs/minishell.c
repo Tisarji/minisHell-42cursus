@@ -60,6 +60,8 @@ char	*ft_readline(void)
 
 void	msh_loop(t_msh *msh)
 {
+	t_token	*token_cursor;
+
 	while (1)
 	{
 		msh->input = ft_readline();
@@ -78,7 +80,9 @@ void	msh_loop(t_msh *msh)
 				continue ;
 			}
 			process_expansion(msh);
-			msh->ast = msh_get_tokens(&msh->token);
+			token_cursor = msh->token;
+			msh->ast = msh_get_tokens(&token_cursor);
+			msh->token = NULL;
 			main_exe(msh);
 		}
 		display_ast_table(msh->ast, 0);

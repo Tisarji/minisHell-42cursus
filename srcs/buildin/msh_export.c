@@ -62,6 +62,8 @@ char	**check_export(t_p *list)
 	char	**temp;
 
 	temp = myft_split(list->args[1], '=');
+	if (!temp)
+		return (NULL);
 	if (!temp[0])
 	{
 		free2d(temp);
@@ -75,8 +77,19 @@ int	add_node(t_tuple **data, t_p *list)
 	t_tuple	*new_node;
 
 	new_node = malloc(sizeof(t_tuple));
-	if (new_node == NULL || make_tuple(new_node, list->args[1], '=') == NULL)
+	if (new_node == NULL)
 		return (EXIT_FAILURE);
+	new_node->key = NULL;
+	new_node->value = NULL;
+	if (make_tuple(new_node, list->args[1], '=') == NULL)
+	{
+		if (new_node->key)
+			free(new_node->key);
+		if (new_node->value)
+			free(new_node->value);
+		free(new_node);
+		return (EXIT_FAILURE);
+	}
 	new_node->next = NULL;
 	if (!*data)
 	{

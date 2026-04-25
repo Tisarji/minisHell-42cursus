@@ -61,9 +61,18 @@ void	free_ast(t_ast *node)
 
 void	cleanup_cmd_node(t_ast *cmd_node)
 {
+	int	i;
+
+	if (!cmd_node)
+		return ;
 	if (cmd_node->args)
 	{
-		free(cmd_node->args[0]);
+		i = 0;
+		while (cmd_node->args[i])
+		{
+			free(cmd_node->args[i]);
+			i++;
+		}
 		free(cmd_node->args);
 	}
 	free(cmd_node);

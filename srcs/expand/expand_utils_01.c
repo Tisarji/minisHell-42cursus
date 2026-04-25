@@ -51,7 +51,6 @@ char	*get_normal_variable_value(t_msh *shell, char **str)
 char	*handle_single_quotes(t_msh *shell, char **str, int expand_vars)
 {
 	char	*segment;
-	char	*full_segment;
 	char	*temp;
 	char	*end;
 
@@ -66,15 +65,11 @@ char	*handle_single_quotes(t_msh *shell, char **str, int expand_vars)
 		segment = expand_string(shell, segment, 1);
 		free(temp);
 	}
-	temp = full_segment = ft_strjoin_for_other("'", segment);
-	full_segment = ft_strjoin_for_other(full_segment, "'");
-	free(temp);
-	free(segment);
 	if (*end == '\'')
 		*str = end + 1;
 	else
 		*str = end;
-	return (full_segment);
+	return (segment);
 }
 
 char	*handle_double_quotes(t_msh *shell, char **str)

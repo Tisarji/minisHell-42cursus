@@ -17,6 +17,8 @@ t_ast	*create_file_list_redir(t_token **tokens, t_token *tmp)
 	t_ast	*redirect_node;
 	t_token	*next;
 
+	if (!tokens || !*tokens || !(*tokens)->next)
+		return (NULL);
 	redirect_node = msh_init_ast((*tokens)->type);
 	if (!redirect_node)
 		return (NULL);
@@ -24,6 +26,25 @@ t_ast	*create_file_list_redir(t_token **tokens, t_token *tmp)
 	*tokens = next->next;
 	redirect_node->left = msh_get_redirect(tokens);
 	redirect_node->right = file_ast_node(next);
+	if (!redirect_node->right)
+	{
+		if (redirect_node->left)
+			free_ast(redirect_node->left);
+		if (next)
+		{
+			if (next->cmd)
+				free(next->cmd);
+			free(next);
+		}
+		if (tmp)
+		{
+			if (tmp->cmd)
+				free(tmp->cmd);
+			free(tmp);
+		}
+		free(redirect_node);
+		return (NULL);
+	}
 	free(tmp->cmd);
 	free(tmp);
 	return (redirect_node);
@@ -33,12 +54,34 @@ t_ast	*handle_redirect(t_token **tokens, t_token *tmp)
 {
 	t_ast	*redirect_node;
 	t_token	*next_token;
+	t_token	*file_token;
 
+	if (!tokens || !*tokens || !(*tokens)->next || !(*tokens)->next->next)
+		return (NULL);
 	next_token = (*tokens)->next;
+	file_token = next_token->next;
 	redirect_node = msh_init_ast((*tokens)->next->type);
-	(*tokens)->next = next_token->next->next;
+	if (!redirect_node)
+		return (NULL);
+	(*tokens)->next = file_token->next;
 	redirect_node->left = msh_get_redirect(&tmp);
-	redirect_node->right = file_ast_node((next_token->next));
+	redirect_node->right = file_ast_node(file_token);
+	if (!redirect_node->right)
+	{
+		if (redirect_node->left)
+			free_ast(redirect_node->left);
+		if (file_token)
+		{
+			if (file_token->cmd)
+				free(file_token->cmd);
+			free(file_token);
+		}
+		if (next_token->cmd)
+			free(next_token->cmd);
+		free(next_token);
+		free(redirect_node);
+		return (NULL);
+	}
 	free(next_token->cmd);
 	free(next_token);
 	return (redirect_node);
@@ -84,6 +127,8 @@ t_ast	*msh_get_redirect(t_token **tokens)
 	if (tmp->type == HEREDOC)
 	{
 		result = msh_get_heredoc_word(tokens);
+		if (!result)
+			return (NULL);
 		if (*tokens && (*tokens)->type >= INDIRECT && \
 			(*tokens)->type <= HEREDOC)
 			result->right = msh_get_redirect(tokens);

@@ -14,9 +14,9 @@
 
 void	update_quote_counts(char c, int *s_q_count, int *d_q_count)
 {
-	if (c == '\'')
+	if (c == '\'' && !(*d_q_count % 2))
 		*s_q_count = (*s_q_count + 1) % 2;
-	else if (c == '\"')
+	else if (c == '\"' && !(*s_q_count % 2))
 		*d_q_count = (*d_q_count + 1) % 2;
 }
 
@@ -77,11 +77,17 @@ int	has_valid_heredoc(const char *input)
 			if (*input == '<' && *(input + 1) == '<')
 			{
 				input += 2;
-				while (*input == ' ')
+				while (*input == ' ' || *input == '\t')
 					input++;
-				if (*input == '\0' || *input == '|' || *input == '&')
+				if (*input == '\0' || *input == '|' || *input == '&'
+					|| *input == '<' || *input == '>')
 					return (1);
-				return (0);
+				while (*input && !ft_isspace(*input) && *input != '|'
+					&& *input != '<' && *input != '>')
+					input++;
+				if (!*input)
+					break ;
+				continue ;
 			}
 		}
 		input++;

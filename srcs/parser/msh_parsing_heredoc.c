@@ -24,7 +24,7 @@ t_ast	*create_heredoc_node_command(t_token **tokens)
 	heredoc_word_node->args = malloc(sizeof(char *) * 2);
 	if (!heredoc_word_node->args)
 	{
-		free_cmd_args(heredoc_word_node);
+		free(heredoc_word_node);
 		return (NULL);
 	}
 	heredoc_word_node->args[0] = ft_strdup((*tokens)->cmd);

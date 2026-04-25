@@ -35,16 +35,21 @@ t_token	*msh_parsing_input(t_msh *msh)
 
 	input_trim = ft_strtrim(msh->input, WHITESPACE);
 	free(msh->input);
+	if (!input_trim)
+		return (NULL);
+	if (*input_trim == '\0')
+	{
+		free(input_trim);
+		return (NULL);
+	}
 	if (syntax_error_checker(input_trim))
 	{
 		free(input_trim);
 		msh->code = 1;
 		return (NULL);
 	}
-	if (!input_trim)
-		return (NULL);
 	if (msh->token)
-		msh->token = NULL;
+		free_cmd_tokens(&msh->token);
 	msh->token = token_input(input_trim);
 	free(input_trim);
 	if (msh->ast)

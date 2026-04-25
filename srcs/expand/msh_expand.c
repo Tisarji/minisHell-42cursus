@@ -61,6 +61,11 @@ char	*process_segment(t_msh *shell, char **str, int expand_vars)
 		return (handle_double_quotes(shell, str));
 	else if (**str == '$' && expand_vars)
 		return (expand_variable_value(shell, str));
+	else if (**str == '$' && !expand_vars)
+	{
+		(*str)++;
+		return (ft_strdup("$"));
+	}
 	else
 		return (handle_plain_text(str));
 }
@@ -70,6 +75,7 @@ char	*expand_string(t_msh *shell, char *str, int expand_vars)
 	char	*result;
 	char	*temp;
 	char	*segment;
+	char	*joined;
 
 	result = ft_strdup("");
 	if (!result)
@@ -80,7 +86,14 @@ char	*expand_string(t_msh *shell, char *str, int expand_vars)
 		if (segment)
 		{
 			temp = result;
-			result = ft_strjoin_for_other(result, segment);
+			joined = ft_strjoin_for_other(result, segment);
+			if (!joined)
+			{
+				free(temp);
+				free(segment);
+				return (NULL);
+			}
+			result = joined;
 			free(temp);
 			free(segment);
 		}
@@ -92,16 +105,23 @@ void	process_expansion(t_msh *shell)
 {
 	t_token	*current;
 	char	*expanded_cmd;
+	int		expand_vars;
 
 	current = shell->token;
 	while (current)
 	{
-		if (ft_strchr(current->cmd, '$') || ft_strchr(current->cmd, '"') \
-			|| ft_strchr(current->cmd, '\''))
+		expand_vars = 1;
+		if (current->prev && current->prev->type == HEREDOC)
+			expand_vars = 0;
+		if (current->cmd && (ft_strchr(current->cmd, '$') || ft_strchr(current->cmd, '"') \
+			|| ft_strchr(current->cmd, '\'')))
 		{
-			expanded_cmd = expand_string(shell, current->cmd, 1);
-			free(current->cmd);
-			current->cmd = expanded_cmd;
+			expanded_cmd = expand_string(shell, current->cmd, expand_vars);
+			if (expanded_cmd)
+			{
+				free(current->cmd);
+				current->cmd = expanded_cmd;
+			}
 		}
 		current = current->next;
 	}

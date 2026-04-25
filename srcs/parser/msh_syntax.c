@@ -74,6 +74,8 @@ int	has_misplaced_operators(const char *input)
 		{
 			if (*input == '|' || *input == '&')
 			{
+				if (*input == '&')
+					return (1);
 				if (expect_command_next || *(input + 1) == '\0')
 					return (1);
 				expect_command_next = 1;
@@ -107,6 +109,8 @@ int	has_logical_operators(const char *input)
 int	syntax_error_checker(const char *input)
 {
 	if (has_unclosed_quotes(input))
+		return (1);
+	if (has_logical_operators(input))
 		return (1);
 	if (has_invalid_redirections(input))
 		return (1);
