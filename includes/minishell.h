@@ -33,9 +33,7 @@
 # include <errno.h>
 
 # include <sys/wait.h>
-# include <fcntl.h>
 
-# include "../libft/includes/libft.h"
 # include "../libft/includes/get_next_line.h"
 # include "./struct.h"
 
