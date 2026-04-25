@@ -27,6 +27,7 @@
 # include <fcntl.h>
 # include <stdint.h>
 # include <signal.h>
+# include <string.h>
 # include "../libft/includes/libft.h"
 # include <stdbool.h>
 # include <errno.h>
