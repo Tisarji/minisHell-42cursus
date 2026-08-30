@@ -68,6 +68,7 @@ PARSER_FILE =	msh_parsing.c			\
 				parsing_heredoc.c		\
 				parsing_pipe.c			\
 				parsing_redir.c			\
+				parsing_redir_utils.c	\
 				parsing_utils.c			\
 				msh_parsing_support.c	\
 				msh_parsing_heredoc.c

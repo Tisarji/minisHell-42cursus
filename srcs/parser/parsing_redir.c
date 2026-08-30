@@ -28,20 +28,7 @@ t_ast	*create_file_list_redir(t_token **tokens, t_token *tmp)
 	redirect_node->right = file_ast_node(next);
 	if (!redirect_node->right)
 	{
-		if (redirect_node->left)
-			free_ast(redirect_node->left);
-		if (next)
-		{
-			if (next->cmd)
-				free(next->cmd);
-			free(next);
-		}
-		if (tmp)
-		{
-			if (tmp->cmd)
-				free(tmp->cmd);
-			free(tmp);
-		}
+		free_file_list_redir_fail(redirect_node->left, next, tmp);
 		free(redirect_node);
 		return (NULL);
 	}
@@ -55,36 +42,38 @@ t_ast	*handle_redirect(t_token **tokens, t_token *tmp)
 	t_ast	*redirect_node;
 	t_token	*next_token;
 	t_token	*file_token;
+	t_token	*continuation;
 
 	if (!tokens || !*tokens || !(*tokens)->next || !(*tokens)->next->next)
 		return (NULL);
 	next_token = (*tokens)->next;
 	file_token = next_token->next;
+	continuation = file_token->next;
 	redirect_node = msh_init_ast((*tokens)->next->type);
 	if (!redirect_node)
 		return (NULL);
-	(*tokens)->next = file_token->next;
-	redirect_node->left = msh_get_redirect(&tmp);
-	redirect_node->right = file_ast_node(file_token);
-	if (!redirect_node->right)
+	(*tokens)->next = continuation;
+	*tokens = continuation;
+	return (finish_redirect_node(redirect_node, tmp, file_token, next_token));
+}
+
+t_ast	*build_heredoc_redirect(t_token **tokens, t_token *next_token,
+		t_token *tmp)
+{
+	t_ast	*result;
+	t_ast	*last_heredoc;
+
+	(*tokens)->next = NULL;
+	*tokens = next_token;
+	result = msh_get_heredoc_word(tokens);
+	if (result)
 	{
-		if (redirect_node->left)
-			free_ast(redirect_node->left);
-		if (file_token)
-		{
-			if (file_token->cmd)
-				free(file_token->cmd);
-			free(file_token);
-		}
-		if (next_token->cmd)
-			free(next_token->cmd);
-		free(next_token);
-		free(redirect_node);
-		return (NULL);
+		last_heredoc = result;
+		while (last_heredoc->left)
+			last_heredoc = last_heredoc->left;
+		last_heredoc->left = msh_get_redirect(&tmp);
 	}
-	free(next_token->cmd);
-	free(next_token);
-	return (redirect_node);
+	return (result);
 }
 
 t_ast	*process_redirection_tokens(t_token **tokens, t_token *tmp)
@@ -106,7 +95,7 @@ t_ast	*process_redirection_tokens(t_token **tokens, t_token *tmp)
 		if (next_token->type >= INDIRECT && next_token->type <= HEREDOC)
 		{
 			if (next_token->type == HEREDOC)
-				result = msh_get_heredoc_word(tokens);
+				result = build_heredoc_redirect(tokens, next_token, tmp);
 			else
 				result = handle_redirect(tokens, tmp);
 			return (result);
@@ -129,18 +118,14 @@ t_ast	*msh_get_redirect(t_token **tokens)
 		result = msh_get_heredoc_word(tokens);
 		if (!result)
 			return (NULL);
-		if (*tokens && (*tokens)->type >= INDIRECT && \
-			(*tokens)->type <= HEREDOC)
+		if (*tokens && (*tokens)->type >= INDIRECT
+			&& (*tokens)->type <= HEREDOC)
 			result->right = msh_get_redirect(tokens);
 		return (result);
 	}
 	result = process_redirection_tokens(tokens, tmp);
 	if (result)
-	{
-		if (*tokens && *tokens != tmp)
-			*tokens = (*tokens)->next;
 		return (result);
-	}
 	result = msh_get_cmd(&tmp);
 	if (result)
 		return (result);

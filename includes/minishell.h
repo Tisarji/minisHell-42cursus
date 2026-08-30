@@ -47,6 +47,7 @@
  **************/
 void		print_tuple(t_tuple *data);
 char		*get_value_from_key(t_tuple *data, char *key);
+void		append_tuple_node(t_tuple *head, char *key, char *value);
 void		updata_value_from_key(t_tuple *data, char *key, char *new_value);
 void		remove_tuple(t_tuple **data, char *key);
 void		clear_tuple(t_tuple **data);
@@ -129,8 +130,8 @@ int			copy_cmd_args(t_ast *cmd_node, t_token **tokens);
 void		process_heredoc_if_needed(t_token **tokens, t_ast *cmd_node);
 
 /** parsing_pipe */
-t_ast		*create_pipe_node(t_token **tokens, \
-		t_token *tmp, t_token *next_token);
+t_ast		*create_pipe_node(t_token **tokens,
+				t_token *tmp, t_token *next_token);
 t_ast		*msh_get_pipe(t_token **tokens);
 t_ast		*create_env_var_node(t_token *current);
 
@@ -141,8 +142,15 @@ t_ast		*create_heredoc_word_node(t_token **token);
 t_ast		*msh_get_heredoc_word(t_token **token);
 
 /** parsing_redir */
+void		free_file_list_redir_fail(t_ast *left, t_token *next, t_token *tmp);
 t_ast		*create_file_list_redir(t_token **tokens, t_token *tmp);
+void		free_handle_redirect_fail(t_ast *left, t_token *file_token,
+				t_token *next_token);
+t_ast		*finish_redirect_node(t_ast *redirect_node, t_token *tmp,
+				t_token *file_token, t_token *next_token);
 t_ast		*handle_redirect(t_token **tokens, t_token *tmp);
+t_ast		*build_heredoc_redirect(t_token **tokens, t_token *next_token,
+				t_token *tmp);
 t_ast		*process_redirection_tokens(t_token **tokens, t_token *tmp);
 t_ast		*msh_get_redirect(t_token **tokens);
 
@@ -178,8 +186,8 @@ void		msh_count_pipe(t_msh *msh);
 
 t_token		*new_token(t_type type, char *value);
 void		add_token_to_list(t_token **tokens, t_token *new_token);
-void		add_word_token_if_valid(char **start, \
-	char **input, t_token **tokens);
+void		add_word_token_if_valid(char **start,
+				char **input, t_token **tokens);
 void		parse_cmd(char **input, t_token **tokens);
 void		parse_type(char **input, t_token **tokens);
 

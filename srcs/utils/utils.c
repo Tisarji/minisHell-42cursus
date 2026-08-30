@@ -92,6 +92,7 @@ void	ft_free(t_msh *data)
 
 void	cleanup_and_exit(t_msh *msh, int exit_code)
 {
+	clear_history();
 	if (!msh)
 		exit(exit_code);
 	if (msh->ast)

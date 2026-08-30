@@ -38,8 +38,32 @@ char	*get_value_from_key(t_tuple *data, char *key)
 	return (value);
 }
 
+void	append_tuple_node(t_tuple *head, char *key, char *value)
+{
+	t_tuple	*new_node;
+
+	new_node = malloc(sizeof(t_tuple));
+	if (!new_node)
+	{
+		if (value)
+			free(value);
+		return ;
+	}
+	new_node->key = ft_strdup(key);
+	new_node->value = value;
+	new_node->next = NULL;
+	new_node->tail = NULL;
+	if (!head)
+		return ;
+	head->tail->next = new_node;
+	head->tail = new_node;
+}
+
 void	updata_value_from_key(t_tuple *data, char *key, char *new_value)
 {
+	t_tuple	*head;
+
+	head = data;
 	while (data)
 	{
 		if (!ft_strncmp(data->key, key, ft_strlen(key)))
@@ -50,8 +74,7 @@ void	updata_value_from_key(t_tuple *data, char *key, char *new_value)
 		}
 		data = data->next;
 	}
-	if (new_value)
-		free(new_value);
+	append_tuple_node(head, key, new_value);
 }
 
 void	clear_tuple(t_tuple **data)

@@ -55,11 +55,11 @@ int	init_here_doc(t_ast *ast, t_ast *temp, t_p *list)
 	if (temp != NULL)
 	{
 		if (temp->type == REDIRECT)
-			list->fd_out = open(temp->right->args[0], \
-				O_RDWR | O_TRUNC | O_CREAT, 0644);
+			list->fd_out = open(temp->right->args[0],
+					O_RDWR | O_TRUNC | O_CREAT, 0644);
 		else if (temp->type == APPEND)
-			list->fd_out = open(temp->right->args[0], \
-				O_RDWR | O_APPEND | O_TRUNC | O_CREAT, 0644);
+			list->fd_out = open(temp->right->args[0],
+					O_RDWR | O_APPEND | O_TRUNC | O_CREAT, 0644);
 	}
 	g_signal = 0;
 	signal(SIGINT, &here_doc_check_signal);
@@ -75,15 +75,16 @@ int	init_here_doc(t_ast *ast, t_ast *temp, t_p *list)
 int	do_here_doc(t_ast *ast, t_ast *temp, t_p *list)
 {
 	char	*getline;
+	int		real_fd_in;
 
 	if (init_here_doc(ast, temp, list) == -1)
 		return (-1);
 	while (1)
 	{
 		getline = readline(">");
-		if (getline == NULL || g_signal == 1 || \
-			ft_strncmp(getline, list->here_doc_cut, \
-		ft_strlen(list->here_doc_cut)) == 0)
+		if (getline == NULL || g_signal == 1
+			|| ft_strncmp(getline, list->here_doc_cut,
+				ft_strlen(list->here_doc_cut)) == 0)
 			break ;
 		write(list->pipe[1], getline, ft_strlen(getline));
 		write(list->pipe[1], "\n", 1);
@@ -93,5 +94,7 @@ int	do_here_doc(t_ast *ast, t_ast *temp, t_p *list)
 	if (getline)
 		free(getline);
 	safe_close(&list->pipe[1]);
-	return (list->pipe[0]);
+	real_fd_in = dup(list->pipe[0]);
+	safe_close(&list->pipe[0]);
+	return (real_fd_in);
 }
