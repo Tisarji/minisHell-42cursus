@@ -19,20 +19,24 @@ void	*make_tuple(t_tuple *new_node, char *str, char c)
 	char	*temp;
 
 	i = 0;
-	while (str[i] != c)
+	while (str[i] && str[i] != c)
 		i++;
 	temp = malloc(sizeof(char) * (i + 1));
-	temp[0] = '\0';
 	if (temp == NULL)
 		return (NULL);
+	temp[0] = '\0';
 	new_node->key = temp;
 	ft_strlcat(temp, str, i + 1);
-	n = ft_strlen(str) - i;
+	if (!str[i])
+		n = 0;
+	else
+		n = ft_strlen(str) - i;
 	temp = malloc(sizeof(char) * (n + 1));
 	if (temp == NULL)
 		return (NULL);
 	temp[0] = '\0';
-	ft_strlcat(temp, (str + i + 1), n);
+	if (str[i])
+		ft_strlcat(temp, (str + i + 1), n);
 	new_node->value = temp;
 	return ((void *)(1));
 }

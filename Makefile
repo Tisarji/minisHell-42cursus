@@ -4,6 +4,7 @@ COLOR_CYAN = \033[1;36m
 COLOR_RED = \033[91m
 COLOR_GREEN = \033[92m
 COLOR_PINK = \033[95m
+COLOR_GRAY = \033[90m
 
 NAME = minishell
 PATH_HEADER = includes
@@ -84,16 +85,24 @@ TOKEN_SRC = $(addprefix $(TOKEN_DIR), $(TOKEN_FILE))
 SRC = $(UTILS_SRC) $(INIT_SRC) $(EXPAND_SRC) $(TOKEN_SRC) $(PARSER_SRC) $(BUILDIN_SRC) $(EXE_SRC) ./srcs/minishell.c
 
 OBJ = $(SRC:$(PATH_SRCS)/%.c=$(OBJ_DIR)/%.o)
+TOTAL_FILES := $(words $(filter %.o,$(OBJ)))
 
 $(OBJ_DIR)/%.o: $(PATH_SRCS)/%.c $(PATH_HEADER)
-	mkdir -p $(@D)
-	$(CC) -c $(CFLAGS) $< -o $@
+	@mkdir -p $(@D)
+	@$(CC) -c $(CFLAGS) $< -o $@
+	@count=$$(find $(OBJ_DIR) -name "*.o" 2>/dev/null | wc -l | tr -d ' '); \
+	printf "\033[2K\r$(COLOR_YELLOW)Compiling minishell... [%s/%s]$(COLOR_RESET) %s" \
+		"$$count" "$(TOTAL_FILES)" "$<"
 
 all : $(NAME)
 
 $(NAME) : $(OBJ)
-	@make -C $(PATH_LIBFT)
-	$(CC) $(OBJ) $(CFLAGS) $(LDFLAGS) -o $(NAME)
+	@printf "\n"
+	@printf "$(COLOR_GRAY)Entering directory '$(PATH_LIBFT)'$(COLOR_RESET)\n"
+	@make -C $(PATH_LIBFT) --no-print-directory
+	@printf "$(COLOR_GRAY)Leaving directory '$(PATH_LIBFT)'$(COLOR_RESET)\n"
+	@$(CC) $(OBJ) $(CFLAGS) $(LDFLAGS) -o $(NAME)
+	@printf "\n"
 	@echo "[$(COLOR_YELLOW)$(NAME) --> OK$(COLOR_RESET)]\n ${COLOR_GREEN}Success!${COLOR_RESET}"
 	@echo "$(COLOR_PINK)\tUsage: ./minishell$(COLOR_RESET)"
 
