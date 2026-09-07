@@ -23,11 +23,14 @@ int	validate_tokens(t_token *tokens)
 	curr = tokens;
 	while (curr)
 	{
-		if (prev && ((prev->type >= INDIRECT && prev->type <= HEREDOC && \
-			curr->type >= INDIRECT && curr->type <= HEREDOC) || \
-			(prev->type == PIPE && curr->type == PIPE)))
+		if (prev && prev->type == PIPE && curr->type == PIPE)
 			return (0);
-		if ((curr->type >= INDIRECT && curr->type <= HEREDOC) && \
+		if (prev && prev->type != PIPE && curr->type != PIPE && \
+			prev->type >= INDIRECT && prev->type <= HEREDOC && \
+			curr->type >= INDIRECT && curr->type <= HEREDOC)
+			return (0);
+		if (curr->type != PIPE && curr->type >= INDIRECT && \
+			curr->type <= HEREDOC && \
 			(!curr->next || curr->next->type >= INDIRECT))
 			return (0);
 		if ((curr->type == PIPE) && (!prev || !curr->next))

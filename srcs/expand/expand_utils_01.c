@@ -48,6 +48,15 @@ char	*get_normal_variable_value(t_msh *shell, char **str)
 	return (expanded_value);
 }
 
+char	*handle_literal_char(char **str)
+{
+	char	*result;
+
+	result = ft_substr(*str, 0, 1);
+	(*str)++;
+	return (result);
+}
+
 char	*handle_single_quotes(t_msh *shell, char **str, int expand_vars)
 {
 	char	*segment;

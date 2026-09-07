@@ -39,8 +39,8 @@
 
 # define STDERR_FILENO 2
 # define WHITESPACE " \t\n\v\f\r"
-# define LETTERS_DIGITS "abcdefghijklmnopqrstuvwxyzABCDEFGH \
-	IJKLMNOPQRSTUVWXYZ0123456789_"
+# define LETTERS_DIGITS "abcdefghijklmnopqrstuvwxyzABCDEFGH" \
+	"IJKLMNOPQRSTUVWXYZ0123456789_"
 
 /**************
  * SRCS/UTILS *
@@ -94,6 +94,7 @@ int			msh_unset(t_p *list);
 /** expand_utils_01 */
 // char		*handle_single_quotes(char **str);
 char		*handle_single_quotes(t_msh *shell, char **str, int expand_vars);
+char		*handle_literal_char(char **str);
 char		*handle_double_quotes(t_msh *shell, char **str);
 char		*handle_plain_text(char **str);
 char		*get_special_variable_value(t_msh *shell, char **str);

@@ -49,6 +49,11 @@ void	child_process(t_p *list, int status)
 	}
 	else
 		pipe_write(list);
+	if (status == -1)
+	{
+		*list->code = 1;
+		exit(*list->code);
+	}
 	check_build_in_command(list->cmd, &a);
 	if (a == 0)
 	{
@@ -63,6 +68,7 @@ void	parent_process(t_p *list)
 {
 	if (list->fd_in > -1)
 		safe_fd(list, 0);
+	safe_fd(list, 1);
 	list->fd_in = dup(list->pipe[0]);
 	safe_close(&list->pipe[0]);
 	safe_close(&list->pipe[1]);

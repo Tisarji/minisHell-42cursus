@@ -15,7 +15,7 @@
 int	msh_unset(t_p *list)
 {
 	if (!list->args[1])
-		return (EXIT_FAILURE);
+		return (EXIT_SUCCESS);
 	remove_tuple(&list->msh->tuple, list->args[1]);
 	return (EXIT_SUCCESS);
 }

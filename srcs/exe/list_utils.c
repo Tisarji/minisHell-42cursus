@@ -57,7 +57,8 @@ void	prepare_cmd(t_ast *ast, t_p *list, int *status)
 {
 	if (!ast)
 		return ;
-	if (ast->type == REDIRECT || ast->type == APPEND || ast->type == INDIRECT)
+	if (*status != -1
+		&& (ast->type == REDIRECT || ast->type == APPEND || ast->type == INDIRECT))
 	{
 		if (ast->type == REDIRECT)
 			open_out_file(ast->right->args[0], list, 1, status);

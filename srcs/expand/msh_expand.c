@@ -55,7 +55,9 @@ char	*expand_variable_value(t_msh *shell, char **str)
 
 char	*process_segment(t_msh *shell, char **str, int expand_vars)
 {
-	if (**str == '\'')
+	if (**str == '\'' && expand_vars == 2)
+		return (handle_literal_char(str));
+	else if (**str == '\'')
 		return (handle_single_quotes(shell, str, expand_vars));
 	else if (**str == '"')
 		return (handle_double_quotes(shell, str));
@@ -101,15 +103,42 @@ char	*expand_string(t_msh *shell, char *str, int expand_vars)
 	return (result);
 }
 
+int	is_removable_empty_token(t_token *token, char *expanded)
+{
+	if (expanded[0] != '\0')
+		return (0);
+	if (ft_strchr(token->cmd, '\'') || ft_strchr(token->cmd, '"'))
+		return (0);
+	if (token->prev && (token->prev->type == INDIRECT \
+		|| token->prev->type == REDIRECT || token->prev->type == APPEND \
+		|| token->prev->type == HEREDOC))
+		return (0);
+	return (1);
+}
+
+void	remove_expanded_token(t_msh *shell, t_token *token)
+{
+	if (token->prev)
+		token->prev->next = token->next;
+	else
+		shell->token = token->next;
+	if (token->next)
+		token->next->prev = token->prev;
+	free(token->cmd);
+	free(token);
+}
+
 void	process_expansion(t_msh *shell)
 {
 	t_token	*current;
+	t_token	*next;
 	char	*expanded_cmd;
 	int		expand_vars;
 
 	current = shell->token;
 	while (current)
 	{
+		next = current->next;
 		expand_vars = 1;
 		if (current->prev && current->prev->type == HEREDOC)
 			expand_vars = 0;
@@ -117,12 +146,17 @@ void	process_expansion(t_msh *shell)
 			|| ft_strchr(current->cmd, '\'')))
 		{
 			expanded_cmd = expand_string(shell, current->cmd, expand_vars);
-			if (expanded_cmd)
+			if (expanded_cmd && is_removable_empty_token(current, expanded_cmd))
+			{
+				free(expanded_cmd);
+				remove_expanded_token(shell, current);
+			}
+			else if (expanded_cmd)
 			{
 				free(current->cmd);
 				current->cmd = expanded_cmd;
 			}
 		}
-		current = current->next;
+		current = next;
 	}
 }

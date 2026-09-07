@@ -57,6 +57,31 @@ int	export_no_args(t_p *list)
 	return (EXIT_SUCCESS);
 }
 
+int	is_valid_identifier(char *name)
+{
+	int	i;
+
+	if (!name || !name[0])
+		return (0);
+	if (!ft_isalpha(name[0]) && name[0] != '_')
+		return (0);
+	i = 1;
+	while (name[i])
+	{
+		if (!ft_isalnum(name[i]) && name[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+void	print_export_error(char *arg)
+{
+	ft_puterrstr("minishell: export: `");
+	ft_puterrstr(arg);
+	ft_puterrstr("': not a valid identifier\n");
+}
+
 char	**check_export(t_p *list)
 {
 	char	**temp;
@@ -115,6 +140,12 @@ int	msh_export(t_p *list)
 	temp = check_export(list);
 	if (!temp)
 		return (EXIT_FAILURE);
+	if (!is_valid_identifier(temp[0]))
+	{
+		print_export_error(list->args[1]);
+		free2d(temp);
+		return (EXIT_FAILURE);
+	}
 	if (get_value_from_key(*data, temp[0]))
 	{
 		updata_value_from_key(*data, temp[0], copy(temp[1]));
